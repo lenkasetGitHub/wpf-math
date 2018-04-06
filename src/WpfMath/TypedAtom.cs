@@ -33,7 +33,7 @@ namespace WpfMath
             return CopyTo(new TypedAtom(Atom?.Copy(), LeftType, RightType));
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             return this.Atom.CreateBox(environment);
         }

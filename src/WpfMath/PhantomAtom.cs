@@ -38,7 +38,7 @@ namespace WpfMath
             return CopyTo(new PhantomAtom(RowAtom?.Copy(), useWidth, useHeight, useDepth) { PreviousAtom = (DummyAtom)PreviousAtom?.Copy() });
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var resultBox = this.RowAtom.CreateBox(environment);
             return new StrutBox((this.useWidth ? resultBox.Width : 0), (this.useHeight ? resultBox.Height : 0),

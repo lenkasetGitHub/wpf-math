@@ -58,7 +58,7 @@ namespace WpfMath
             return ((CharSymbol)this.Atom).GetCharFont(texFont);
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             if (this.IsTextSymbol)
                 ((CharSymbol)this.Atom).IsTextSymbol = true;

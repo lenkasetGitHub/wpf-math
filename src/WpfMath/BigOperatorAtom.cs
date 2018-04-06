@@ -3,7 +3,7 @@ using System;
 namespace WpfMath
 {
     // Atom representing big operator with optional limits.
-    internal class BigOperatorAtom : Atom
+    internal readonly struct BigOperatorAtom : IAtom
     {
         private static Box ChangeWidth(Box box, double maxWidth)
         {
@@ -62,7 +62,7 @@ namespace WpfMath
             return CopyTo(new BigOperatorAtom(BaseAtom?.Copy(), LowerLimitAtom?.Copy(), UpperLimitAtom?.Copy(), UseVerticalLimits));
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var texFont = environment.MathFont;
             var style = environment.Style;

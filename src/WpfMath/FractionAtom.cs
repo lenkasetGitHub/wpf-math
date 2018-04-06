@@ -92,7 +92,7 @@ namespace WpfMath
             return CopyTo(atom);
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var texFont = environment.MathFont;
             var style = environment.Style;

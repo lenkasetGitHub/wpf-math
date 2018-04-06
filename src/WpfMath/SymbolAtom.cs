@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace WpfMath
 {
     // Atom representing symbol (non-alphanumeric character).
-    internal class SymbolAtom : CharSymbol
+    internal readonly struct SymbolAtom : ICharSymbol
     {
         /// <summary>
         /// Special name of empty delimiter symbol that shouldn't be rendered.
@@ -39,7 +39,7 @@ namespace WpfMath
             try
             {
                 var symbol = symbols[name];
-                return new SymbolAtom(symbol, symbol.Type) { Source = source };
+                return new SymbolAtom(symbol, symbol.Type, source);
             }
             catch (KeyNotFoundException)
             {
@@ -47,60 +47,55 @@ namespace WpfMath
             }
         }
 
-        public static bool TryGetAtom(SourceSpan name, out SymbolAtom atom)
+        public static bool TryGetAtom(SourceSpan name, out SymbolAtom? atom)
         {
-            SymbolAtom temp;
-            var nameString = name.ToString();
-            if (symbols.TryGetValue(name.ToString(), out temp))
+            if (symbols.TryGetValue(name.ToString(), out var temp))
             {
-                atom = new SymbolAtom(temp, temp.Type) { Source = name };
+                atom = new SymbolAtom(temp, temp.Type, name);
                 return true;
             }
+
             atom = null;
             return false;
         }
 
-        public SymbolAtom(SymbolAtom symbolAtom, TexAtomType type)
-            : base()
+        public TexAtomType Type { get; }
+        public TexAtomType GetLeftType() => Type;
+        public TexAtomType GetRightType() => Type;
+
+        public SourceSpan Source { get; }
+        public bool IsTextSymbol => false;
+
+        public SymbolAtom(SymbolAtom symbolAtom, TexAtomType type, SourceSpan source)
         {
             if (!validSymbolTypes[(int)type])
                 throw new ArgumentException("The specified type is not a valid symbol type.", "type");
             this.Type = type;
             this.Name = symbolAtom.Name;
             this.IsDelimeter = symbolAtom.IsDelimeter;
+            this.Source = source;
         }
 
         public SymbolAtom(string name, TexAtomType type, bool isDelimeter)
-            : base()
         {
             this.Type = type;
             this.Name = name;
             this.IsDelimeter = isDelimeter;
+            this.Source = null;
         }
 
-        public bool IsDelimeter
-        {
-            get;
-            private set;
-        }
+        public bool IsDelimeter { get; }
 
-        public string Name
-        {
-            get;
-            private set;
-        }
+        public string Name { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new SymbolAtom(Name, Type, IsDelimeter));
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public Box CreateBox(TexEnvironment environment)
         {
             return new CharBox(environment, environment.MathFont.GetCharInfo(this.Name, environment.Style));
         }
 
-        public override CharFont GetCharFont(ITeXFont texFont)
+        public ITeXFont GetStyledFont(TexEnvironment environment) => environment.MathFont;
+
+        public CharFont GetCharFont(ITeXFont texFont)
         {
             // Style is irrelevant here.
             return texFont.GetCharInfo(Name, TexStyle.Display).GetCharacterFont();

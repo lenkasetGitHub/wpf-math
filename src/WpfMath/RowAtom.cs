@@ -111,7 +111,7 @@ namespace WpfMath
             return CopyTo(atom);
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             // Create result box.
             var resultBox = new HorizontalBox(environment.Foreground, environment.Background);

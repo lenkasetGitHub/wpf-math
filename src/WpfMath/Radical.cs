@@ -33,7 +33,7 @@ namespace WpfMath
             return CopyTo(new Radical(BaseAtom?.Copy(), DegreeAtom?.Copy()));
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var texFont = environment.MathFont;
             var style = environment.Style;

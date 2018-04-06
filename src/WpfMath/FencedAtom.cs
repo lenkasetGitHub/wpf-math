@@ -44,7 +44,7 @@ namespace WpfMath
             return CopyTo(new FencedAtom(BaseAtom?.Copy(), (SymbolAtom)LeftDelimeter?.Copy(), (SymbolAtom)RightDelimeter?.Copy()));
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var texFont = environment.MathFont;
             var style = environment.Style;

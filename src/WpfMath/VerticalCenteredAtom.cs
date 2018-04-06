@@ -19,7 +19,7 @@ namespace WpfMath
             return CopyTo(Atom?.Copy());
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var box = this.Atom.CreateBox(environment);
 

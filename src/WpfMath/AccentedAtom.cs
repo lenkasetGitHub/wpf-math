@@ -2,67 +2,55 @@ using System;
 
 namespace WpfMath
 {
-    // Atom representing base atom with accent above it.
-    internal class AccentedAtom : Atom
+    /// <summary>Atom representing base atom with accent above it.</summary>
+    internal readonly struct AccentedAtom : IAtom
     {
-        public AccentedAtom(Atom baseAtom, string accentName, SourceSpan source)
+        public TexAtomType Type => TexAtomType.Ordinary;
+        public TexAtomType GetLeftType() => Type;
+        public TexAtomType GetRightType() => Type;
+
+        public SourceSpan Source { get; }
+
+        public AccentedAtom(IAtom baseAtom, string accentName, SourceSpan source)
         {
             this.BaseAtom = baseAtom;
             this.AccentAtom = SymbolAtom.GetAtom(accentName, source);
+            this.Source = source;
 
             if (this.AccentAtom.Type != TexAtomType.Accent)
                 throw new ArgumentException("The specified symbol name is not an accent.", "accent");
         }
 
-        public AccentedAtom(Atom baseAtom, TexFormula accent)
+        public AccentedAtom(IAtom baseAtom, TexFormula accent)
         {
-            var rootSymbol = accent.RootAtom as SymbolAtom;
+            var rootSymbol = accent.RootAtom as SymbolAtom?;
             if (rootSymbol == null)
                 throw new ArgumentException("The formula for the accent is not a single symbol.", "accent");
-            this.AccentAtom = (SymbolAtom)rootSymbol;
+            this.AccentAtom = rootSymbol.Value;
 
             if (this.AccentAtom.Type != TexAtomType.Accent)
                 throw new ArgumentException("The specified symbol name is not an accent.", "accent");
+
+            this.BaseAtom = null;
+            this.Source = null;
         }
 
-        private AccentedAtom()
-        {
-        }
-
-        // Atom over which accent symbol is placed.
-        public Atom BaseAtom
-        {
-            get;
-            private set;
-        }
+        /// <summary>Atom over which accent symbol is placed.</summary>
+        public IAtom BaseAtom { get; }
 
         // Atom representing accent symbol to place over base atom.
-        public SymbolAtom AccentAtom
-        {
-            get;
-            private set;
-        }
+        public SymbolAtom AccentAtom { get; }
 
-        public override Atom Copy()
+        public Box CreateBox(TexEnvironment environment)
         {
-            return CopyTo(new AccentedAtom()
+            ICharSymbol GetBaseChar(IAtom baseAtom)
             {
-                BaseAtom = BaseAtom?.Copy(),
-                AccentAtom = (SymbolAtom)AccentAtom?.Copy()
-            });
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
-        {
-            CharSymbol GetBaseChar()
-            {
-                var baseAtom = BaseAtom;
                 while (baseAtom is AccentedAtom a)
                 {
                     baseAtom = a.BaseAtom;
                 }
 
-                return baseAtom as CharSymbol;
+                return baseAtom as ICharSymbol;
             }
 
             var texFont = environment.MathFont;
@@ -70,7 +58,7 @@ namespace WpfMath
 
             // Create box for base atom.
             var baseBox = this.BaseAtom == null ? StrutBox.Empty : this.BaseAtom.CreateBox(environment.GetCrampedStyle());
-            var baseCharFont = GetBaseChar()?.GetCharFont(texFont);
+            var baseCharFont = GetBaseChar(BaseAtom)?.GetCharFont(texFont);
             var skew = baseCharFont == null ? 0.0 : texFont.GetSkew(baseCharFont, style);
 
             // Find character of best scale for accent symbol.

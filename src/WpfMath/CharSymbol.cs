@@ -1,28 +1,13 @@
 namespace WpfMath
 {
-    // Atom representing single character that can be marked as text symbol.
-    internal abstract class CharSymbol : Atom
+    /// <summary>Atom representing single character that can be marked as text symbol.</summary>
+    internal interface ICharSymbol : IAtom
     {
-        public CharSymbol()
-        {
-            this.IsTextSymbol = false;
-        }
-
-        public bool IsTextSymbol
-        {
-            get;
-            set;
-        }
-
-        protected override Atom CopyTo(Atom atom)
-        {
-            ((CharSymbol)atom).IsTextSymbol = IsTextSymbol;
-            return base.CopyTo(atom);
-        }
+        bool IsTextSymbol { get; }
 
         /// <summary>Returns the preferred font to render this character.</summary>
-        public virtual ITeXFont GetStyledFont(TexEnvironment environment) => environment.MathFont;
+        ITeXFont GetStyledFont(TexEnvironment environment) => environment.MathFont;
 
-        public abstract CharFont GetCharFont(ITeXFont texFont);
+        CharFont GetCharFont(ITeXFont texFont);
     }
 }

@@ -24,7 +24,7 @@ namespace WpfMath
             return CopyTo(new CharAtom(Source, TextStyle));
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var font = GetStyledFont(environment);
             var charInfo = GetCharInfo(font, environment.Style);

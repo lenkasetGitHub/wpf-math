@@ -1,32 +1,26 @@
 namespace WpfMath
 {
     // Atom representing big delimeter (e.g. brackets).
-    internal class BigDelimeterAtom : Atom
+    internal readonly struct BigDelimeterAtom : IAtom
     {
-        public BigDelimeterAtom(Atom delimeterAtom, int size)
+        public TexAtomType Type => TexAtomType.Ordinary;
+        public TexAtomType GetLeftType() => Type;
+        public TexAtomType GetRightType() => Type;
+
+        public SourceSpan Source { get; }
+
+        public BigDelimeterAtom(IAtom delimeterAtom, int size)
         {
             this.DelimeterAtom = delimeterAtom;
             this.Size = size;
+            this.Source = null;
         }
 
-        public Atom DelimeterAtom
-        {
-            get;
-            private set;
-        }
+        public IAtom DelimeterAtom { get; }
 
-        public int Size
-        {
-            get;
-            private set;
-        }
+        public int Size { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new BigDelimeterAtom(DelimeterAtom.Copy(), Size));
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public Box CreateBox(TexEnvironment environment)
         {
             // TODO
             var resultBox = (Box)null; // DelimiterFactory.CreateBox(this.DelimeterAtom, this.Size, environment);
