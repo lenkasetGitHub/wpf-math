@@ -30,29 +30,12 @@ namespace WpfMath
         }
 
         // Atom over which accent symbol is placed.
-        public Atom BaseAtom
-        {
-            get;
-            private set;
-        }
+        public Atom BaseAtom { get; }
 
         // Atom representing accent symbol to place over base atom.
-        public SymbolAtom AccentAtom
-        {
-            get;
-            private set;
-        }
+        public SymbolAtom AccentAtom { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new AccentedAtom()
-            {
-                BaseAtom = BaseAtom?.Copy(),
-                AccentAtom = (SymbolAtom)AccentAtom?.Copy()
-            });
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             CharSymbol GetBaseChar()
             {

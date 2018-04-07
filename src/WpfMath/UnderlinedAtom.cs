@@ -3,24 +3,19 @@ namespace WpfMath
     // Atom representing other atom that is underlined.
     internal class UnderlinedAtom : Atom
     {
-        public UnderlinedAtom(Atom baseAtom)
+        public UnderlinedAtom(Atom baseAtom) : base(baseAtom.Source)
         {
-            this.Type = TexAtomType.Ordinary;
             this.BaseAtom = baseAtom;
         }
 
-        public Atom BaseAtom
-        {
-            get;
-            private set;
-        }
+        public Atom BaseAtom { get; }
 
         public override Atom Copy()
         {
             return CopyTo(new UnderlinedAtom(BaseAtom?.Copy()));
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        protected override Box CreateBox(TexEnvironment environment)
         {
             var defaultLineThickness = environment.MathFont.GetDefaultLineThickness(environment.Style);
 

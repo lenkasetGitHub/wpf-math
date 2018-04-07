@@ -97,7 +97,6 @@
     <Compile Include="GlueSettingsParser.cs" />
     <Compile Include="HorizontalBox.cs" />
     <Compile Include="HorizontalRule.cs" />
-    <Compile Include="IRow.cs" />
     <Compile Include="ITeXFont.cs" />
     <Compile Include="OverBar.cs" />
     <Compile Include="OverlinedAtom.cs" />

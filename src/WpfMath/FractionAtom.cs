@@ -11,14 +11,14 @@ namespace WpfMath
                 return TexAlignment.Center;
         }
 
-        private TexAlignment numeratorAlignment;
-        private TexAlignment denominatorAlignment;
+        private readonly TexAlignment numeratorAlignment;
+        private readonly TexAlignment denominatorAlignment;
 
-        private double lineThickness;
-        private TexUnit lineThicknessUnit;
+        private readonly double lineThickness;
+        private readonly TexUnit lineThicknessUnit;
 
-        private bool useDefaultThickness;
-        private double? lineRelativeThickness;
+        private readonly bool useDefaultThickness;
+        private readonly double? lineRelativeThickness;
 
         public FractionAtom(Atom numerator, Atom denominator, double relativeThickness,
             TexAlignment numeratorAlignment, TexAlignment denominatorAlignment)
@@ -35,8 +35,8 @@ namespace WpfMath
             this.denominatorAlignment = CheckAlignment(denominatorAlignment);
         }
 
-        public FractionAtom(Atom numerator, Atom denominator, bool drawLine)
-            : this(numerator, denominator, drawLine, TexUnit.Pixel, 0d)
+        public FractionAtom(SourceSpan source, Atom numerator, Atom denominator, bool drawLine)
+            : this(source, numerator, denominator, drawLine, TexUnit.Pixel, 0d)
         {
         }
 
@@ -53,11 +53,16 @@ namespace WpfMath
         {
         }
 
-        protected FractionAtom(Atom numerator, Atom denominator, bool useDefaultThickness, TexUnit unit, double thickness)
+        protected FractionAtom(
+            SourceSpan source,
+            Atom numerator,
+            Atom denominator,
+            bool useDefaultThickness,
+            TexUnit unit,
+            double thickness) : base(TexAtomType.Inner, source)
         {
             SpaceAtom.CheckUnit(unit);
 
-            this.Type = TexAtomType.Inner;
             this.Numerator = numerator;
             this.Denominator = denominator;
             this.numeratorAlignment = TexAlignment.Center;
@@ -67,32 +72,11 @@ namespace WpfMath
             this.lineThickness = thickness;
         }
 
-        public Atom Numerator
-        {
-            get;
-            private set;
-        }
+        public Atom Numerator { get; }
 
-        public Atom Denominator
-        {
-            get;
-            private set;
-        }
+        public Atom Denominator { get; }
 
-        public override Atom Copy()
-        {
-            var atom = new FractionAtom(Numerator?.Copy(), Denominator?.Copy(), lineThicknessUnit, lineThickness);
-            atom.numeratorAlignment = numeratorAlignment;
-            atom.denominatorAlignment = denominatorAlignment;
-            atom.useDefaultThickness = useDefaultThickness;
-
-            atom.useDefaultThickness = useDefaultThickness;
-            atom.lineRelativeThickness = lineRelativeThickness;
-
-            return CopyTo(atom);
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             var texFont = environment.MathFont;
             var style = environment.Style;
@@ -104,7 +88,8 @@ namespace WpfMath
                 lineHeight = this.lineRelativeThickness.HasValue ? this.lineRelativeThickness.Value * defaultLineThickness :
                     defaultLineThickness;
             else
-                lineHeight = new SpaceAtom(this.lineThicknessUnit, 0, this.lineThickness, 0).CreateBox(environment).Height;
+                lineHeight = new SpaceAtom(null, this.lineThicknessUnit, 0, this.lineThickness, 0)
+                    .CreateBox(environment).Height;
 
             // Create boxes for numerator and demoninator atoms, and make them of equal width.
             var numeratorBox = this.Numerator == null ? StrutBox.Empty :

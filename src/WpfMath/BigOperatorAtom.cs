@@ -21,48 +21,26 @@ namespace WpfMath
         }
 
         public BigOperatorAtom(Atom baseAtom, Atom lowerLimitAtom, Atom upperLimitAtom)
+            : base(TexAtomType.BigOperator, baseAtom.Source)
         {
-            this.Type = TexAtomType.BigOperator;
             this.BaseAtom = baseAtom;
             this.LowerLimitAtom = lowerLimitAtom;
             this.UpperLimitAtom = upperLimitAtom;
             this.UseVerticalLimits = null;
-            this.Source = baseAtom.Source;
         }
 
         // Atom representing big operator.
-        public Atom BaseAtom
-        {
-            get;
-            private set;
-        }
+        public Atom BaseAtom { get; }
 
         // Atoms representing lower and upper limits.
-        public Atom LowerLimitAtom
-        {
-            get;
-            private set;
-        }
+        public Atom LowerLimitAtom { get; }
 
-        public Atom UpperLimitAtom
-        {
-            get;
-            private set;
-        }
+        public Atom UpperLimitAtom { get; }
 
         // True if limits should be drawn over and under the base atom; false if they should be drawn as scripts.
-        public bool? UseVerticalLimits
-        {
-            get;
-            private set;
-        }
+        public bool? UseVerticalLimits { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new BigOperatorAtom(BaseAtom?.Copy(), LowerLimitAtom?.Copy(), UpperLimitAtom?.Copy(), UseVerticalLimits));
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             var texFont = environment.MathFont;
             var style = environment.Style;
@@ -70,7 +48,8 @@ namespace WpfMath
             if ((this.UseVerticalLimits.HasValue && !UseVerticalLimits.Value) ||
                 (!this.UseVerticalLimits.HasValue && style >= TexStyle.Text))
                 // Attach atoms for limits as scripts.
-                return new ScriptsAtom(this.BaseAtom, this.LowerLimitAtom, this.UpperLimitAtom) { Source = Source }.CreateBox(environment);
+                return new ScriptsAtom(this.BaseAtom, this.LowerLimitAtom, this.UpperLimitAtom, this.Source)
+                    .CreateBox(environment);
 
             // Create box for base atom.
             Box baseBox;

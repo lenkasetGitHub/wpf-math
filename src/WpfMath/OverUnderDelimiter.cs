@@ -13,65 +13,35 @@ namespace WpfMath
             return maxWidth;
         }
 
-        public OverUnderDelimiter(Atom baseAtom, Atom script, SymbolAtom symbol, TexUnit kernUnit, double kern, bool over)
+        public OverUnderDelimiter(
+            SourceSpan source,
+            Atom baseAtom,
+            Atom script,
+            SymbolAtom symbol,
+            TexUnit kernUnit,
+            double kern,
+            bool over) : base(source)
         {
-            this.Type = TexAtomType.Inner;
             this.BaseAtom = baseAtom;
             this.Script = script;
             this.Symbol = symbol;
-            this.Kern = new SpaceAtom(kernUnit, 0, kern, 0);
+            this.Kern = new SpaceAtom(null, kernUnit, 0, kern, 0);
             this.Over = over;
         }
 
-        private OverUnderDelimiter()
-        {
-        }
+        public Atom BaseAtom { get; }
 
-        public Atom BaseAtom
-        {
-            get;
-            private set;
-        }
+        private Atom Script { get; }
 
-        private Atom Script
-        {
-            get;
-            set;
-        }
-
-        private SymbolAtom Symbol
-        {
-            get;
-            set;
-        }
+        private SymbolAtom Symbol { get; }
 
         // Kern between delimeter symbol and script.
-        private SpaceAtom Kern
-        {
-            get;
-            set;
-        }
+        private SpaceAtom Kern { get; }
 
         // True to place delimeter symbol Over base; false to place delimeter symbol under base.
-        public bool Over
-        {
-            get;
-            set;
-        }
+        public bool Over { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new OverUnderDelimiter()
-            {
-                BaseAtom = BaseAtom?.Copy(),
-                Script = Script?.Copy(),
-                Symbol = (SymbolAtom)Symbol?.Copy(),
-                Kern = (SpaceAtom)Kern?.Copy(),
-                Over = Over
-            });
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             // Create boxes for base, delimeter, and script atoms.
             var baseBox = this.BaseAtom == null ? StrutBox.Empty : this.BaseAtom.CreateBox(environment);

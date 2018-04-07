@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace WpfMath
 {
     // Atom representing horizontal row of other atoms, separated by glue.
-    internal class RowAtom : Atom, IRow
+    internal class RowAtom : Atom
     {
         // Set of atom types that make previous atom of BinaryOperator type change to Ordinary type.
         private static BitArray binaryOperatorChangeSet;
@@ -32,86 +33,59 @@ namespace WpfMath
             ligatureKernChangeSet.Set((int)TexAtomType.Punctuation, true);
         }
 
-        public RowAtom(IList<TexFormula> formulaList)
-            : this()
+        public RowAtom(SourceSpan source, IList<TexFormula> formulaList)
+            : this(
+                source,
+                formulaList
+                    .Where(formula => formula.RootAtom != null)
+                    .Select(formula => formula.RootAtom))
         {
-            foreach (var formula in formulaList)
-            {
-                if (formula.RootAtom != null)
-                    this.Elements.Add(formula.RootAtom);
-            }
         }
 
-        public RowAtom(Atom baseAtom)
-            : this()
+        public RowAtom(SourceSpan source, Atom baseAtom)
+            : this(
+                source,
+                baseAtom is RowAtom
+                    ? (IEnumerable<Atom>)((RowAtom) baseAtom).Elements
+                    : new[]{baseAtom})
         {
-            if (baseAtom != null)
-            {
-                if (baseAtom is RowAtom)
-                {
-                    foreach (var atom in ((RowAtom)baseAtom).Elements)
-                        this.Elements.Add(atom);
-                }
-                else
-                {
-                    this.Elements.Add(baseAtom);
-                }
-            }
         }
 
-        public RowAtom()
-            : base()
+        public RowAtom(SourceSpan source)
+            : base(source)
         {
-            this.Elements = new List<Atom>();
+            this.Elements = new List<Atom>().AsReadOnly();
         }
 
-        public DummyAtom PreviousAtom
-        {
-            get;
-            set;
-        }
+        private RowAtom(SourceSpan source, IEnumerable<Atom> elements) : base(source) =>
+            this.Elements = elements.ToList().AsReadOnly();
 
-        public List<Atom> Elements
-        {
-            get;
-            private set;
-        }
+        public DummyAtom PreviousAtom { get; }
 
-        public void Add(Atom atom)
-        {
-            if (atom != null)
-                this.Elements.Add(atom);
-        }
+        public ReadOnlyCollection<Atom> Elements { get; }
 
-        private void ChangeAtomToOrdinary(DummyAtom currentAtom, DummyAtom previousAtom, Atom nextAtom)
+        public RowAtom Add(Atom atom) =>
+            new RowAtom(this.Source, this.Elements.Concat(new[] { atom }));
+
+        private static DummyAtom ChangeAtomToOrdinary(DummyAtom currentAtom, DummyAtom previousAtom, Atom nextAtom)
         {
             var type = currentAtom.GetLeftType();
             if (type == TexAtomType.BinaryOperator && (previousAtom == null ||
                 binaryOperatorChangeSet[(int)previousAtom.GetRightType()]))
             {
-                currentAtom.Type = TexAtomType.Ordinary;
+                currentAtom = currentAtom.WithType(TexAtomType.Ordinary);
             }
             else if (nextAtom != null && currentAtom.GetRightType() == TexAtomType.BinaryOperator)
             {
                 var nextType = nextAtom.GetLeftType();
                 if (nextType == TexAtomType.Relation || nextType == TexAtomType.Closing || nextType == TexAtomType.Punctuation)
-                    currentAtom.Type = TexAtomType.Ordinary;
+                    currentAtom = currentAtom.WithType(TexAtomType.Ordinary);
             }
+
+            return currentAtom;
         }
 
-        public override Atom Copy()
-        {
-            var atom = new RowAtom();
-
-            atom.PreviousAtom = (DummyAtom)PreviousAtom?.Copy();
-            foreach (var element in Elements)
-            {
-                atom.Elements.Add(element?.Copy());
-            }
-            return CopyTo(atom);
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             // Create result box.
             var resultBox = new HorizontalBox(environment.Foreground, environment.Background);
@@ -119,12 +93,12 @@ namespace WpfMath
             // Create and add box for each atom in row.
             for (int i = 0; i < this.Elements.Count; i++)
             {
-                var curAtom = new DummyAtom(this.Elements[i]);
+                var curAtom = new DummyAtom(null, this.Elements[i]);
 
                 // Change atom type to Ordinary, if required.
                 var hasNextAtom = i < this.Elements.Count - 1;
                 var nextAtom = hasNextAtom ? (Atom)this.Elements[i + 1] : null;
-                ChangeAtomToOrdinary(curAtom, this.PreviousAtom, nextAtom);
+                curAtom = ChangeAtomToOrdinary(curAtom, this.PreviousAtom, nextAtom);
 
                 // Check if atom is part of ligature or should be kerned.
                 var kern = 0d;
@@ -147,7 +121,7 @@ namespace WpfMath
                             else
                             {
                                 // Atom is part of ligature.
-                                curAtom.SetLigature(new FixedCharAtom(ligatureCharFont));
+                                curAtom = curAtom.WithLigature(new FixedCharAtom(ligatureCharFont));
                                 i++;
                             }
                         }

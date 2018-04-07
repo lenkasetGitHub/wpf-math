@@ -1,19 +1,19 @@
 namespace WpfMath
 {
     // Atom representing other atom that is not rendered.
-    internal class PhantomAtom : Atom, IRow
+    internal class PhantomAtom : Atom
     {
-        private bool useWidth;
-        private bool useHeight;
-        private bool useDepth;
+        private readonly bool useWidth;
+        private readonly bool useHeight;
+        private readonly bool useDepth;
 
-        public PhantomAtom(Atom baseAtom)
-            : this(baseAtom, true, true, true)
+        public PhantomAtom(SourceSpan source, Atom baseAtom)
+            : this(source, baseAtom, true, true, true)
         {
         }
 
-        public PhantomAtom(Atom baseAtom, bool useWidth, bool useHeight, bool useDepth)
-            : base()
+        public PhantomAtom(SourceSpan source, Atom baseAtom, bool useWidth, bool useHeight, bool useDepth)
+            : base(source)
         {
             this.RowAtom = baseAtom == null ? new RowAtom() : new RowAtom(baseAtom);
             this.useWidth = useWidth;
@@ -21,24 +21,11 @@ namespace WpfMath
             this.useDepth = useDepth;
         }
 
-        public DummyAtom PreviousAtom
-        {
-            get { return this.RowAtom.PreviousAtom; }
-            set { this.RowAtom.PreviousAtom = value; }
-        }
+        public DummyAtom PreviousAtom => this.RowAtom.PreviousAtom;
 
-        public RowAtom RowAtom
-        {
-            get;
-            private set;
-        }
+        public RowAtom RowAtom { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new PhantomAtom(RowAtom?.Copy(), useWidth, useHeight, useDepth) { PreviousAtom = (DummyAtom)PreviousAtom?.Copy() });
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             var resultBox = this.RowAtom.CreateBox(environment);
             return new StrutBox((this.useWidth ? resultBox.Width : 0), (this.useHeight ? resultBox.Height : 0),

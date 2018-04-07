@@ -547,7 +547,7 @@ namespace WpfMath
             {
                 if (value[i] == primeChar)
                 {
-                    primesRowAtom.Add(SymbolAtom.GetAtom("prime", new SourceSpan(value, i, 1)));
+                    primesRowAtom = primesRowAtom.Add(SymbolAtom.GetAtom("prime", new SourceSpan(value, i, 1)));
                     position++;
                 }
                 else if (!IsWhiteSpace(value[i]))
@@ -613,7 +613,7 @@ namespace WpfMath
             }
             else
             {
-                return new ScriptsAtom(atom, subscriptAtom, superscriptAtom);
+                return new ScriptsAtom(atom.Source, atom, subscriptAtom, superscriptAtom);
             }
         }
 

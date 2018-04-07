@@ -34,19 +34,18 @@ namespace WpfMath
         }
 
         // True to represent hard space (actual space character).
-        private bool isHardSpace;
+        private readonly bool isHardSpace;
 
-        private double width;
-        private double height;
-        private double depth;
+        private readonly double width;
+        private readonly double height;
+        private readonly double depth;
 
-        private TexUnit widthUnit;
-        private TexUnit heightUnit;
-        private TexUnit depthUnit;
+        private readonly TexUnit widthUnit;
+        private readonly TexUnit heightUnit;
+        private readonly TexUnit depthUnit;
 
-        public SpaceAtom(TexUnit widthUnit, double width, TexUnit heightUnit, double height,
-            TexUnit depthUnit, double depth)
-            : base()
+        public SpaceAtom(SourceSpan source, TexUnit widthUnit, double width, TexUnit heightUnit, double height,
+            TexUnit depthUnit, double depth) : base(source)
         {
             CheckUnit(widthUnit);
             CheckUnit(heightUnit);
@@ -61,8 +60,7 @@ namespace WpfMath
             this.depth = depth;
         }
 
-        public SpaceAtom(TexUnit unit, double width, double height, double depth)
-            : base()
+        public SpaceAtom(SourceSpan source, TexUnit unit, double width, double height, double depth) : base(source)
         {
             CheckUnit(unit);
 
@@ -75,30 +73,12 @@ namespace WpfMath
             this.depth = depth;
         }
 
-        public SpaceAtom()
-            : base()
+        public SpaceAtom(SourceSpan source) : base(source)
         {
             this.isHardSpace = true;
         }
 
-        public override Atom Copy()
-        {
-            var atom = new SpaceAtom();
-
-            atom.isHardSpace = isHardSpace;
-
-            atom.width = width;
-            atom.height = height;
-            atom.depth = depth;
-
-            atom.widthUnit = widthUnit;
-            atom.heightUnit = heightUnit;
-            atom.depthUnit = depthUnit;
-
-            return CopyTo(atom);
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             if (isHardSpace)
                 return new StrutBox(environment.MathFont.GetSpace(environment.Style), 0, 0, 0);

@@ -3,41 +3,20 @@ namespace WpfMath
     // Atom (smallest unit) of TexFormula.
     internal abstract class Atom
     {
-        public Atom()
+        protected Atom(TexAtomType type, SourceSpan source)
         {
-            this.Type = TexAtomType.Ordinary;
+            this.Type = type;
+            this.Source = source;
         }
 
-        public TexAtomType Type
+        protected Atom(SourceSpan source) : this(TexAtomType.Ordinary, source)
         {
-            get;
-            set;
         }
 
-        public SourceSpan Source
-        {
-            get;
-            set;
-        }
+        public TexAtomType Type { get; }
+        public SourceSpan Source { get; }
 
-        public Box CreateBox(TexEnvironment environment)
-        {
-            var box = CreateBoxCore(environment);
-            if (box.Source == null)
-                box.Source = Source;
-            return box;
-        }
-
-        public abstract Atom Copy();
-
-        protected virtual Atom CopyTo(Atom atom)
-        {
-            atom.Type = Type;
-            atom.Source = Source;
-            return atom;
-        }
-
-        protected abstract Box CreateBoxCore(TexEnvironment environment);
+        public abstract Box CreateBox(TexEnvironment environment);
 
         // Gets type of leftmost child item.
         public virtual TexAtomType GetLeftType()

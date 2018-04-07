@@ -3,25 +3,14 @@ namespace WpfMath
     // Atom representing other atom with horizontal rule above it.
     internal class OverlinedAtom : Atom
     {
-        public OverlinedAtom(Atom baseAtom)
-            : base()
+        public OverlinedAtom(SourceSpan source, Atom baseAtom) : base(source)
         {
-            this.Type = TexAtomType.Ordinary;
             this.BaseAtom = baseAtom;
         }
 
-        public Atom BaseAtom
-        {
-            get;
-            private set;
-        }
+        public Atom BaseAtom { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new OverlinedAtom(BaseAtom?.Copy()));
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             // Create box for base atom, in cramped style.
             var baseBox = this.BaseAtom == null ? StrutBox.Empty : this.BaseAtom.CreateBox(environment.GetCrampedStyle());

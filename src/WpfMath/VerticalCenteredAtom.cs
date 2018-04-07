@@ -8,18 +8,9 @@ namespace WpfMath
             this.Atom = atom;
         }
 
-        public Atom Atom
-        {
-            get;
-            private set;
-        }
+        public Atom Atom { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(Atom?.Copy());
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             var box = this.Atom.CreateBox(environment);
 

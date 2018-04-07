@@ -5,44 +5,23 @@ namespace WpfMath
     // Atom specifying graphical style.
     internal class StyledAtom : Atom, IRow
     {
-        public StyledAtom(Atom atom, Brush backgroundColor, Brush foregroundColor)
+        public StyledAtom(SourceSpan source, Atom atom, Brush backgroundColor, Brush foregroundColor) : base(source)
         {
             this.RowAtom = new RowAtom(atom);
             this.Background = backgroundColor;
             this.Foreground = foregroundColor;
         }
 
-        public DummyAtom PreviousAtom
-        {
-            get { return this.RowAtom.PreviousAtom; }
-            set { this.RowAtom.PreviousAtom = value; }
-        }
+        public DummyAtom PreviousAtom => this.RowAtom.PreviousAtom;
 
         // RowAtom to which colors are applied.
-        public RowAtom RowAtom
-        {
-            get;
-            private set;
-        }
+        public RowAtom RowAtom { get; }
 
-        public Brush Background
-        {
-            get;
-            set;
-        }
+        public Brush Background { get; }
 
-        public Brush Foreground
-        {
-            get;
-            set;
-        }
+        public Brush Foreground { get; }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new StyledAtom(RowAtom?.Copy(), Background, Foreground) { PreviousAtom = (DummyAtom)PreviousAtom?.Copy() });
-        }
-
-        protected override Box CreateBoxCore(TexEnvironment environment)
+        public override Box CreateBox(TexEnvironment environment)
         {
             var newEnvironment = environment.Clone();
             if (this.Background != null)
@@ -62,9 +41,17 @@ namespace WpfMath
             return this.RowAtom.GetRightType();
         }
 
-        public StyledAtom Clone()
+        public StyledAtom Clone(
+            SourceSpan source = null,
+            RowAtom rowAtom = null,
+            Brush background = null,
+            Brush foreground = null)
         {
-            return new StyledAtom(this.RowAtom, this.Background, this.Foreground);
+            return new StyledAtom(
+                source ?? this.Source,
+                rowAtom ?? this.RowAtom,
+                background ?? this.Background,
+                foreground ?? this.Foreground);
         }
     }
 }

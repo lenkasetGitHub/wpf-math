@@ -1,35 +1,22 @@
 namespace WpfMath
 {
     // Dummy atom representing atom whose type can change or which can be replaced by a ligature.
+    // TODO[F]: It looks like this atom is always temporary so the constructors shouldn't accept SourceSpan
     internal class DummyAtom : Atom
     {
-        public DummyAtom(Atom atom)
+        public DummyAtom(TexAtomType type, SourceSpan source, Atom atom, bool isTextSymbol) : base(type, source)
         {
-            this.Type = TexAtomType.None;
             this.Atom = atom;
-            this.IsTextSymbol = false;
+            this.IsTextSymbol = isTextSymbol;
         }
 
-        public DummyAtom PreviousAtom
+        public DummyAtom(SourceSpan source, Atom atom) : this(TexAtomType.None, source, atom, false)
         {
-            set
-            {
-                if (this.Atom is IRow)
-                    ((IRow)this.Atom).PreviousAtom = value;
-            }
         }
 
-        public Atom Atom
-        {
-            get;
-            private set;
-        }
+        public Atom Atom { get; }
 
-        public bool IsTextSymbol
-        {
-            get;
-            set;
-        }
+        public bool IsTextSymbol { get; }
 
         public bool IsCharSymbol
         {
@@ -41,32 +28,16 @@ namespace WpfMath
             get { return this.Atom is SpaceAtom; }
         }
 
-        public override Atom Copy()
-        {
-            return CopyTo(new DummyAtom(Atom?.Copy()) { IsTextSymbol = IsTextSymbol });
-        }
-
-        public void SetLigature(FixedCharAtom ligatureAtom)
-        {
-            this.Atom = ligatureAtom;
-            this.Type = TexAtomType.None;
-            this.IsTextSymbol = false;
-        }
+        public DummyAtom WithLigature(FixedCharAtom ligatureAtom) =>
+            new DummyAtom(TexAtomType.None, this.Source, ligatureAtom, false);
 
         public CharFont GetCharFont(ITeXFont texFont)
         {
             return ((CharSymbol)this.Atom).GetCharFont(texFont);
         }
 
-        protected override Box CreateBoxCore(TexEnvironment environment)
-        {
-            if (this.IsTextSymbol)
-                ((CharSymbol)this.Atom).IsTextSymbol = true;
-            var resultBox = this.Atom.CreateBox(environment);
-            if (this.IsTextSymbol)
-                ((CharSymbol)this.Atom).IsTextSymbol = false;
-            return resultBox;
-        }
+        public override Box CreateBox(TexEnvironment environment) =>
+            ((CharSymbol) this.Atom).CreateBox(environment, true);
 
         public override TexAtomType GetLeftType()
         {

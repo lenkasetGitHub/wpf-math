@@ -71,11 +71,11 @@ namespace WpfMath
             {
                 if (!(this.RootAtom is RowAtom))
                     this.RootAtom = new RowAtom(RootAtom);
-                ((RowAtom)RootAtom).Add(atom);
+                this.RootAtom = ((RowAtom)RootAtom).Add(atom);
             }
         }
 
-        public void SetForeground(Brush brush)
+        public TexFormula WithForeground(Brush brush)
         {
             if (this.RootAtom is StyledAtom)
             {
