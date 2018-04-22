@@ -44,3 +44,10 @@ let ``ScriptsAtom should set Shift on the created box when creating box without 
 
     let expectedShift = -(box.Height + box.Depth) / 2.0 - environment.MathFont.GetAxisHeight(environment.Style)
     Assert.Equal(expectedShift, box.Shift)
+
+[<Fact>]
+let ``Cyrillic followed by Latin should be rendered properly``() =
+    Utils.initializeFontResourceLoading()
+    let atom = parse @"\text{Ц}V"
+    let box = atom.CreateBox environment
+    Assert.NotNull(box)
